@@ -50,10 +50,6 @@ async function extractTextFromPdf(file: File): Promise<string> {
   return data.text;
 }
 
-async function extractTextFromTxt(file: File): Promise<string> {
-  return file.text();
-}
-
 export async function extractText(file: File): Promise<string> {
   if (file.size > MAX_FILE_SIZE) {
     throw new Error('File size exceeds the 10MB limit.');
@@ -69,11 +65,7 @@ export async function extractText(file: File): Promise<string> {
           console.error(error);
           throw new Error('Could not extract text from the PDF. Please check your file format.');
       }
-    case 'txt':
-      return await extractTextFromTxt(file);
     default:
-      throw new Error('Unsupported file type. Only PDF or TXT files are allowed.');
+      throw new Error('Unsupported file type. Only PDF files are allowed.');
   }
 }
-
-    

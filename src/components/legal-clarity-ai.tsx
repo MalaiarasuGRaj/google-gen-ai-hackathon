@@ -172,14 +172,14 @@ export default function LegalClarityAI() {
               Upload or Paste Document
             </CardTitle>
             <CardDescription>
-              Upload a .pdf or .txt file, or paste the document text below.
+              Upload a .pdf file, or paste the document text below.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Input 
                 type="file" 
-                accept=".pdf,.txt"
+                accept=".pdf"
                 onChange={handleFileChange} 
                 disabled={isLoading} 
               />
@@ -349,5 +349,3 @@ export default function LegalClarityAI() {
     </div>
   );
 }
-
-    
