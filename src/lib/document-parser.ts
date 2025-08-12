@@ -1,6 +1,6 @@
 'use server';
 
-import pdf from 'pdf-parse';
+import pdf from 'pdf-parse/lib/pdf-parse.js';
 import * as docx from 'docx';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -14,13 +14,7 @@ async function extractTextFromPdf(file: File): Promise<string> {
 async function extractTextFromDocx(file: File): Promise<string> {
     const buffer = await file.arrayBuffer();
     const doc = await docx.Importer.load(buffer);
-    const text: string[] = [];
-    
-    doc.paragraphs.forEach(p => {
-        text.push(p.text);
-    });
-
-    return text.join('\n\n');
+    return doc.paragraphs.map(p => p.text).join('\n\n');
 }
 
 async function extractTextFromTxt(file: File): Promise<string> {

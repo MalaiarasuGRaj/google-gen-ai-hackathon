@@ -1,0 +1,13 @@
+diff --git a/node_modules/pdf-parse/index.js b/node_modules/pdf-parse/index.js
+index 45a6a68..e393f73 100644
+--- a/node_modules/pdf-parse/index.js
++++ b/node_modules/pdf-parse/index.js
+@@ -16,7 +16,7 @@
+ 
+ //see https://github.com/mozilla/pdf.js/issues/1572
+ const pdfjs = require('./lib/pdf.js');
+-pdfjs.GlobalWorkerOptions.workerSrc = require.resolve('./lib/pdf.worker.js');
++// pdfjs.GlobalWorkerOptions.workerSrc = require.resolve('./lib/pdf.worker.js');
+ 
+ function render_page(pageData) {
+     //check documents https://mozilla.github.io/pdf.js/
