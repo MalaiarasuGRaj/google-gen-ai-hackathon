@@ -51,8 +51,9 @@ async function extractTextFromPdf(file: File): Promise<string> {
 async function extractTextFromDocx(file: File): Promise<string> {
     const buffer = await file.arrayBuffer();
     const doc = await docx.Importer.load(buffer);
-    const paragraphs = doc.getParagraphs();
-    return paragraphs.map(p => p.getTextRun().map(run => run.text).join('')).join('\n\n');
+    return doc.getParagraphs().map(p => {
+        return p.runs.map(r => r.text).join('');
+    }).join('\n\n');
 }
 
 async function extractTextFromTxt(file: File): Promise<string> {
