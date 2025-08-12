@@ -1,7 +1,6 @@
 'use server';
 
 import pdf from 'pdf-parse/lib/pdf-parse.js';
-import * as docx from 'docx';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -51,13 +50,6 @@ async function extractTextFromPdf(file: File): Promise<string> {
   return data.text;
 }
 
-async function extractTextFromDocx(file: File): Promise<string> {
-    const buffer = await file.arrayBuffer();
-    const doc = await docx.Importer.load(buffer);
-    const paragraphs = doc.getParagraphs();
-    return paragraphs.map(p => p.getTextRun().map(r => r.text).join('')).join('\n\n');
-}
-
 async function extractTextFromTxt(file: File): Promise<string> {
   return file.text();
 }
@@ -77,16 +69,11 @@ export async function extractText(file: File): Promise<string> {
           console.error(error);
           throw new Error('Could not extract text from the PDF. Please check your file format.');
       }
-    case 'docx':
-        try {
-            return await extractTextFromDocx(file);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Could not extract text from the DOCX. Please check your file format.');
-        }
     case 'txt':
       return await extractTextFromTxt(file);
     default:
-      throw new Error('Unsupported file type. Only PDF, DOCX, or TXT files are allowed.');
+      throw new Error('Unsupported file type. Only PDF or TXT files are allowed.');
   }
 }
+
+    
