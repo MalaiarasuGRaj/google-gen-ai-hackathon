@@ -24,11 +24,11 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import {
-  generateSummaryAction,
+  processDocumentAction,
   explainClauseAction,
   askQuestionAction,
 } from '@/lib/actions';
-import type { ExplainClauseOutput, InteractiveQAOutput, SmartSummarizationOutput } from '@/lib/actions';
+import type { ExplainClauseOutput, InteractiveQAOutput, ProcessDocumentOutput } from '@/lib/actions';
 
 type RiskScore = 'Low' | 'Medium' | 'High';
 
@@ -48,9 +48,11 @@ const riskConfig: Record<RiskScore, { className: string; text: string }> = {
 };
 
 export default function LegalClarityAI() {
+  const [rawText, setRawText] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentText, setDocumentText] = useState<string>('');
   const [clauses, setClauses] =useState<string[]>([]);
-  const [summary, setSummary] = useState<SmartSummarizationOutput | null>(null);
+  const [summary, setSummary] = useState<ProcessDocumentOutput['summary'] | null>(null);
   const [clauseExplanations, setClauseExplanations] = useState<Record<number, ExplainClauseOutput>>({});
   const [qaHistory, setQaHistory] = useState<InteractiveQAOutput[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
@@ -63,40 +65,39 @@ export default function LegalClarityAI() {
 
   const { toast } = useToast();
 
-  const handleProcessDocument = (text: string) => {
-    if (!text.trim()) {
-      toast({ title: 'Error', description: 'Document text cannot be empty.', variant: 'destructive' });
+  const handleProcessDocument = () => {
+    if (!rawText.trim() && !selectedFile) {
+      toast({ title: 'Error', description: 'Please upload a file or paste text.', variant: 'destructive' });
       return;
     }
 
     startTransition(async () => {
-      setDocumentText(text);
-      const parsedClauses = text.split(/\n\s*\n/).filter(p => p.trim() !== '');
-      setClauses(parsedClauses);
-      
-      const result = await generateSummaryAction({ documentText: text });
-      if (result.success) {
-        setSummary(result.data);
+      const formData = new FormData();
+      if (selectedFile) {
+        formData.append('file', selectedFile);
       } else {
-        toast({ title: 'Summarization Failed', description: result.error, variant: 'destructive' });
+        formData.append('text', rawText);
+      }
+
+      const result = await processDocumentAction(formData);
+
+      if (result.success) {
+        const { documentText: processedText, summary: summaryData } = result.data;
+        setDocumentText(processedText);
+        const parsedClauses = processedText.split(/\n\s*\n/).filter(p => p.trim() !== '');
+        setClauses(parsedClauses);
+        setSummary(summaryData);
+      } else {
+        toast({ title: 'Processing Failed', description: result.error, variant: 'destructive' });
       }
     });
   };
   
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type === 'text/plain') {
-        const text = await file.text();
-        handleProcessDocument(text);
-      } else {
-        toast({
-          title: "Unsupported File Type",
-          description: "Please upload a .txt file. PDF and DOCX support is coming soon.",
-          variant: "destructive",
-        });
-      }
-      event.target.value = '';
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    setSelectedFile(file);
+    if(file) {
+      setRawText('');
     }
   };
 
@@ -141,6 +142,8 @@ export default function LegalClarityAI() {
 
   const handleReset = () => {
     setDocumentText('');
+    setRawText('');
+    setSelectedFile(null);
     setClauses([]);
     setSummary(null);
     setClauseExplanations({});
@@ -169,23 +172,35 @@ export default function LegalClarityAI() {
               Upload or Paste Document
             </CardTitle>
             <CardDescription>
-              Upload a .txt file or paste the document text below.
+              Upload a .pdf, .docx, or .txt file, or paste the document text below.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Input type="file" accept=".txt" onChange={handleFileUpload} disabled={isLoading} />
+              <Input 
+                type="file" 
+                accept=".pdf,.docx,.txt"
+                onChange={handleFileChange} 
+                disabled={isLoading} 
+              />
+              {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
               <p className="text-xs text-muted-foreground text-center">OR</p>
             </div>
             <Textarea
-              placeholder="Paste your legal document text here..."
+              placeholder="Or paste your legal document text here..."
               className="min-h-[250px] text-sm"
-              id="doc-text"
+              value={rawText}
+              onChange={(e) => {
+                setRawText(e.target.value);
+                if (e.target.value) {
+                  setSelectedFile(null);
+                }
+              }}
               disabled={isLoading}
             />
             <Button
-              onClick={() => handleProcessDocument((document.getElementById('doc-text') as HTMLTextAreaElement)?.value)}
-              disabled={isLoading}
+              onClick={handleProcessDocument}
+              disabled={isLoading || (!rawText.trim() && !selectedFile)}
               className="w-full"
             >
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
