@@ -1,7 +1,7 @@
 'use server';
 
 import pdf from 'pdf-parse';
-import docx from 'docx';
+import * as docx from 'docx';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
