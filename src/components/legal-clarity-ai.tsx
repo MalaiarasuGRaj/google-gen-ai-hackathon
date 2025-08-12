@@ -59,6 +59,7 @@ export default function LegalClarityAI() {
   const [activeTab, setActiveTab] = useState('summary');
   const [explainingClause, setExplainingClause] = useState<number | null>(null);
   const [askingQuestion, setAskingQuestion] = useState(false);
+  const [activeAccordionItem, setActiveAccordionItem] = useState<string | undefined>();
 
   const { toast } = useToast();
 
@@ -128,6 +129,14 @@ export default function LegalClarityAI() {
       toast({ title: 'Q&A Failed', description: result.error, variant: 'destructive' });
     }
     setAskingQuestion(false);
+  };
+  
+  const onAccordionValueChange = (value: string) => {
+    setActiveAccordionItem(value);
+    if(value) {
+      const clauseIndex = parseInt(value.split('-')[1]);
+      handleExplainClause(clauseIndex);
+    }
   };
 
   const handleReset = () => {
@@ -229,10 +238,15 @@ export default function LegalClarityAI() {
                   <CardDescription>Click on each clause to get a simple explanation and risk assessment.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
+                  <Accordion 
+                    type="single" 
+                    collapsible 
+                    className="w-full"
+                    value={activeAccordionItem}
+                    onValueChange={onAccordionValueChange}>
                     {clauses.map((clause, index) => (
                       <AccordionItem value={`item-${index}`} key={index}>
-                        <AccordionTrigger onOpening={() => handleExplainClause(index)}>
+                        <AccordionTrigger>
                           <span className="text-left">Clause {index + 1}</span>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-4">
