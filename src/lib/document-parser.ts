@@ -27,8 +27,11 @@ async function renderPageWithLayout(pageData: any): Promise<string> {
     for (const item of sortedItems) {
         if (lastY !== null) {
             // A large vertical gap likely indicates a new paragraph
-            if (Math.abs(lastY - item.transform[5]) > item.height * 1.5) {
+            if (item.str.trim() && Math.abs(lastY - item.transform[5]) > item.height * 1.5) {
                 text += '\n\n';
+            } else if (!item.str.trim() && item.height > 0) {
+                 // Attempt to preserve line breaks from empty lines
+                 text += '\n';
             } else {
                  text += ' ';
             }
@@ -36,7 +39,7 @@ async function renderPageWithLayout(pageData: any): Promise<string> {
         text += item.str;
         lastY = item.transform[5];
     }
-    return text;
+    return text.replace(/\s*\n\s*/g, '\n\n').trim();
 }
 
 
@@ -51,9 +54,8 @@ async function extractTextFromPdf(file: File): Promise<string> {
 async function extractTextFromDocx(file: File): Promise<string> {
     const buffer = await file.arrayBuffer();
     const doc = await docx.Importer.load(buffer);
-    return doc.getParagraphs().map(p => {
-        return p.runs.map(r => r.text).join('');
-    }).join('\n\n');
+    const paragraphs = doc.getParagraphs();
+    return paragraphs.map(p => p.getTextRun().map(r => r.text).join('')).join('\n\n');
 }
 
 async function extractTextFromTxt(file: File): Promise<string> {
