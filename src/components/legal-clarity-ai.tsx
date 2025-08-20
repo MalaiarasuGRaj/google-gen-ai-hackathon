@@ -83,9 +83,8 @@ export default function LegalClarityAI() {
       const result = await processDocumentAction(formData);
 
       if (result.success) {
-        const { documentText: processedText, summary: summaryData } = result.data;
+        const { documentText: processedText, summary: summaryData, clauses: parsedClauses } = result.data;
         setDocumentText(processedText);
-        const parsedClauses = processedText.split(/\n\s*\n/).filter(p => p.trim() !== '');
         setClauses(parsedClauses);
         setSummary(summaryData);
       } else {
@@ -222,7 +221,7 @@ export default function LegalClarityAI() {
               <TabsList>
                 <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
                 <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
-                <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&amp;A</TabsTrigger>
+                <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&A</TabsTrigger>
               </TabsList>
               <Button variant="outline" onClick={handleReset}>Start Over</Button>
             </div>
@@ -306,7 +305,7 @@ export default function LegalClarityAI() {
             <TabsContent value="qa">
               <Card>
                 <CardHeader>
-                  <CardTitle>Interactive Q&amp;A</CardTitle>
+                  <CardTitle>Interactive Q&A</CardTitle>
                   <CardDescription>Ask a question about the document in plain language.</CardDescription>
                 </CardHeader>
                 <CardContent>

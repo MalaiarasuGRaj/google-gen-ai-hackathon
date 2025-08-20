@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { smartSummarization, SmartSummarizationInput, SmartSummarizationOutput } from '@/ai/flows/smart-summarization';
 import { explainClause, ExplainClauseInput, ExplainClauseOutput } from '@/ai/flows/clause-explanation';
 import { interactiveQA, InteractiveQAInput, InteractiveQAOutput } from '@/ai/flows/interactive-qa';
+import { identifyClauses } from '@/ai/flows/identify-clauses';
 import { extractText, normalizeText } from './document-parser';
 
 // Re-export types for client-side usage
@@ -13,6 +14,7 @@ export type { ExplainClauseOutput, InteractiveQAOutput };
 export type ProcessDocumentOutput = {
   documentText: string;
   summary: SmartSummarizationOutput;
+  clauses: string[];
 }
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
@@ -44,11 +46,15 @@ export async function processDocumentAction(
   }
 
   try {
-    const summary = await smartSummarization({ documentText });
-    return { success: true, data: { documentText, summary } };
+    const [summary, clauseData] = await Promise.all([
+      smartSummarization({ documentText }),
+      identifyClauses({ documentText })
+    ]);
+    
+    return { success: true, data: { documentText, summary, clauses: clauseData.clauses } };
   } catch (e) {
     console.error(e);
-    return { success: false, error: 'An unexpected error occurred during summarization.' };
+    return { success: false, error: 'An unexpected error occurred during document analysis.' };
   }
 }
 

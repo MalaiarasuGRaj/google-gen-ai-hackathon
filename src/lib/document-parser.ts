@@ -13,13 +13,16 @@ export async function normalizeText(text: string): Promise<string> {
 // Custom PDF text renderer to preserve paragraphs
 async function renderPageWithLayout(pageData: any): Promise<string> {
     const renderOptions = {
-        normalizeWhitespace: true,
+        normalizeWhitespace: false,
         disableCombineTextItems: false,
     };
 
     const textContent = await pageData.getTextContent(renderOptions);
     let lastY: number | null = null;
+    let lastX: number | null = null;
+    let lastFont: string | null = null;
     let text = '';
+    
     // Sort items by their vertical and then horizontal position
     const sortedItems = textContent.items.sort((a: any, b: any) => {
       if (a.transform[5] < b.transform[5]) return 1;
@@ -30,23 +33,32 @@ async function renderPageWithLayout(pageData: any): Promise<string> {
     });
 
     for (const item of sortedItems) {
-        if (lastY !== null) {
-            // A large vertical gap likely indicates a new paragraph
-            if (item.str.trim() && Math.abs(lastY - item.transform[5]) > item.height * 1.5) {
+        const currentY = item.transform[5];
+        const currentX = item.transform[4];
+        const currentFont = item.fontName;
+
+        if (lastY !== null && lastX !== null) {
+            const yDiff = Math.abs(lastY - currentY);
+            const xDiff = currentX - lastX;
+            const fontChanged = lastFont !== currentFont;
+
+            // A large vertical gap, a new line with no indent, or a font change often indicates a new paragraph
+            if (yDiff > item.height * 1.5 || (xDiff < -5 && yDiff > item.height * 0.5) || (fontChanged && yDiff > item.height)) {
                 text += '\n\n';
-            } else if (!item.str.trim() && item.height > 0) {
-                 // Attempt to preserve line breaks from empty lines
-                 text += '\n';
-            } else {
-                 text += ' ';
+            } else if (yDiff > item.height * 0.5) { // Smaller gap might just be a new line
+                text += '\n';
+            } else if (xDiff > item.width) { // A horizontal gap is likely a space
+                text += ' ';
             }
         }
+        
         text += item.str;
-        lastY = item.transform[5];
+        lastY = currentY;
+        lastX = currentX;
+        lastFont = currentFont;
     }
     return normalizeText(text);
 }
-
 
 async function extractTextFromPdf(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
