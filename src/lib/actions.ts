@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { smartSummarization, SmartSummarizationInput, SmartSummarizationOutput } from '@/ai/flows/smart-summarization';
 import { explainClause, ExplainClauseInput, ExplainClauseOutput } from '@/ai/flows/clause-explanation';
 import { interactiveQA, InteractiveQAInput, InteractiveQAOutput } from '@/ai/flows/interactive-qa';
-import { extractText } from './document-parser';
+import { extractText, normalizeText } from './document-parser';
 
 // Re-export types for client-side usage
 export type { ExplainClauseOutput, InteractiveQAOutput };
@@ -28,7 +28,7 @@ export async function processDocumentAction(
     if (file) {
       documentText = await extractText(file);
     } else if (text) {
-      documentText = text;
+      documentText = normalizeText(text);
     } else {
       return { success: false, error: 'No file or text provided.' };
     }

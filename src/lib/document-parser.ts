@@ -4,6 +4,12 @@ import pdf from 'pdf-parse/lib/pdf-parse.js';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+// Helper function to normalize text by preserving paragraphs
+export async function normalizeText(text: string): Promise<string> {
+    // Replace multiple newlines with a standard double newline for paragraph breaks
+    return text.replace(/(\r\n|\r|\n){2,}/g, '\n\n').trim();
+}
+
 // Custom PDF text renderer to preserve paragraphs
 async function renderPageWithLayout(pageData: any): Promise<string> {
     const renderOptions = {
@@ -38,7 +44,7 @@ async function renderPageWithLayout(pageData: any): Promise<string> {
         text += item.str;
         lastY = item.transform[5];
     }
-    return text.replace(/\s*\n\s*/g, '\n\n').trim();
+    return normalizeText(text);
 }
 
 
