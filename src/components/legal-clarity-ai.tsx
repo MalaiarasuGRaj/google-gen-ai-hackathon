@@ -9,7 +9,8 @@ import {
   MessageSquare,
   ChevronDown,
   Info,
-  Bot
+  Bot,
+  Lightbulb
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -269,15 +270,30 @@ export default function LegalClarityAI() {
                           {explainingClause === index ? (
                             <div className="flex items-center text-sm text-primary"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Generating explanation...</div>
                           ) : clauseExplanations[index] ? (
-                            <div className="space-y-3 p-3 border-l-4 border-accent rounded-r-md bg-card">
-                              <div className="flex justify-between items-center">
-                                <h4 className="font-semibold text-foreground">Simplified Explanation</h4>
-                                <Badge className={cn('text-xs', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
-                                  {riskConfig[clauseExplanations[index].riskScore as RiskScore]?.text}
-                                </Badge>
+                            <>
+                              <div className="space-y-3 p-3 border-l-4 border-primary/50 rounded-r-md bg-card">
+                                <div className="flex justify-between items-center">
+                                  <h4 className="font-semibold text-foreground">Simplified Explanation</h4>
+                                  <Badge className={cn('text-xs', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
+                                    {riskConfig[clauseExplanations[index].riskScore as RiskScore]?.text}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm">{clauseExplanations[index].explanation}</p>
                               </div>
-                              <p className="text-sm">{clauseExplanations[index].explanation}</p>
-                            </div>
+                              {clauseExplanations[index].negotiationSuggestions && clauseExplanations[index].negotiationSuggestions.length > 0 && (
+                                <div className="space-y-3 p-3 border-l-4 border-accent rounded-r-md bg-card">
+                                  <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                    <Lightbulb className="h-5 w-5 text-accent"/>
+                                    Actionable Suggestions
+                                  </h4>
+                                  <ul className="list-disc pl-5 space-y-2 text-sm">
+                                    {clauseExplanations[index].negotiationSuggestions.map((suggestion, i) => (
+                                      <li key={i}>{suggestion}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </>
                           ) : null}
                         </AccordionContent>
                       </AccordionItem>

@@ -23,6 +23,7 @@ const ExplainClauseOutputSchema = z.object({
   riskScore: z
     .enum(['Low', 'Medium', 'High'])
     .describe('A risk score indicating the user obligations.'),
+  negotiationSuggestions: z.array(z.string()).describe('Concrete suggestions for negotiation, including alternative wording or questions to ask.'),
 });
 export type ExplainClauseOutput = z.infer<typeof ExplainClauseOutputSchema>;
 
@@ -36,7 +37,10 @@ const prompt = ai.definePrompt({
   output: {schema: ExplainClauseOutputSchema},
   prompt: `You are a legal expert simplifying legal clauses for laypersons.
 
-  Provide a simplified explanation of the following clause and assign a risk score (Low, Medium, High) indicating the user's obligations.
+  For the following clause, provide:
+  1. A simplified explanation.
+  2. A risk score (Low, Medium, High) indicating the user's obligations.
+  3. Actionable negotiation suggestions. If the risk is Medium or High, suggest alternative, more favorable wording or specific questions the user should ask to clarify ambiguity and reduce risk. If the risk is Low, state that no changes are likely needed.
 
   Clause: {{{clause}}}`,
 });
