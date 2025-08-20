@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -28,7 +29,7 @@ export async function processDocumentAction(
     if (file) {
       documentText = await extractText(file);
     } else if (text) {
-      documentText = normalizeText(text);
+      documentText = await normalizeText(text);
     } else {
       return { success: false, error: 'No file or text provided.' };
     }
