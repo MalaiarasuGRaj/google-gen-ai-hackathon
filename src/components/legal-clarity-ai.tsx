@@ -55,7 +55,7 @@ export default function LegalClarityAI() {
   const [clauses, setClauses] =useState<string[]>([]);
   const [summary, setSummary] = useState<ProcessDocumentOutput['summary'] | null>(null);
   const [clauseExplanations, setClauseExplanations] = useState<Record<number, ExplainClauseOutput>>({});
-  const [qaHistory, setQaHistory] = useState<InteractiveQAOutput[]>([]);
+  const [qaHistory, setQaHistory] = useState<(InteractiveQAOutput & {question: string})[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
 
   const [isLoading, startTransition] = useTransition();
@@ -181,14 +181,15 @@ export default function LegalClarityAI() {
                 type="file" 
                 accept=".pdf"
                 onChange={handleFileChange} 
-                disabled={isLoading} 
+                disabled={isLoading}
+                className="text-sm"
               />
               {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
               <p className="text-xs text-muted-foreground text-center">OR</p>
             </div>
             <Textarea
               placeholder="Or paste your legal document text here..."
-              className="min-h-[250px] text-sm"
+              className="min-h-[200px] md:min-h-[250px] text-sm"
               value={rawText}
               onChange={(e) => {
                 setRawText(e.target.value);
@@ -206,8 +207,8 @@ export default function LegalClarityAI() {
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Analyze Document
             </Button>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground p-2 border rounded-md">
-                <Info className="h-4 w-4 flex-shrink-0" />
+            <div className="flex items-start md:items-center gap-2 text-xs text-muted-foreground p-2 border rounded-md">
+                <Info className="h-4 w-4 flex-shrink-0 mt-0.5 md:mt-0" />
                 <span>
                     <strong>Privacy Assurance:</strong> Your documents are processed in-memory and are not stored. We respect your privacy and confidentiality.
                 </span>
@@ -217,13 +218,13 @@ export default function LegalClarityAI() {
       ) : (
         <div className="w-full max-w-5xl animate-fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
+            <div className="flex flex-col-reverse md:flex-row justify-between md:items-center gap-4 mb-4">
+              <TabsList className="grid w-full grid-cols-3 md:w-auto">
                 <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
                 <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
                 <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&A</TabsTrigger>
               </TabsList>
-              <Button variant="outline" onClick={handleReset}>Start Over</Button>
+              <Button variant="outline" onClick={handleReset} className='w-full md:w-auto'>Start Over</Button>
             </div>
 
             <TabsContent value="summary">
@@ -271,9 +272,9 @@ export default function LegalClarityAI() {
                           ) : clauseExplanations[index] ? (
                             <>
                               <div className="space-y-3 p-3 border-l-4 border-primary/50 rounded-r-md bg-card">
-                                <div className="flex justify-between items-center">
-                                  <h4 className="font-semibold text-foreground">Simplified Explanation</h4>
-                                  <Badge className={cn('text-xs', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
+                                <div className="flex justify-between items-start">
+                                  <h4 className="font-semibold text-foreground flex-1 pr-2">Simplified Explanation</h4>
+                                  <Badge className={cn('text-xs whitespace-nowrap', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
                                     {riskConfig[clauseExplanations[index].riskScore as RiskScore]?.text}
                                   </Badge>
                                 </div>
@@ -321,13 +322,13 @@ export default function LegalClarityAI() {
                                 {qaHistory.map((qa, index) => (
                                     <div key={index} className="space-y-4">
                                         <div className="flex justify-end">
-                                            <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-lg">
+                                            <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%] md:max-w-lg">
                                                 <p className="text-sm font-semibold">You</p>
                                                 <p className="text-sm">{qa.question}</p>
                                             </div>
                                         </div>
                                         <div className="flex justify-start">
-                                            <div className="bg-muted p-3 rounded-lg max-w-lg flex gap-3">
+                                            <div className="bg-muted p-3 rounded-lg max-w-[80%] md:max-w-lg flex gap-3">
                                                 <div className="bg-background rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center">
                                                     <Bot className="h-5 w-5 text-primary"/>
                                                 </div>
