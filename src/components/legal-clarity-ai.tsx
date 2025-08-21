@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useTransition } from 'react';
@@ -222,7 +223,7 @@ export default function LegalClarityAI() {
               <TabsList className="grid w-full grid-cols-3 md:w-auto">
                 <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
                 <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
-                <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&A</TabsTrigger>
+                <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&amp;A</TabsTrigger>
               </TabsList>
               <Button variant="outline" onClick={handleReset} className='w-full md:w-auto'>Start Over</Button>
             </div>
@@ -306,7 +307,7 @@ export default function LegalClarityAI() {
             <TabsContent value="qa">
               <Card>
                 <CardHeader>
-                  <CardTitle>Interactive Q&A</CardTitle>
+                  <CardTitle>Interactive Q&amp;A</CardTitle>
                   <CardDescription>Ask a question about the document in plain language.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -328,10 +329,7 @@ export default function LegalClarityAI() {
                                             </div>
                                         </div>
                                         <div className="flex justify-start">
-                                            <div className="bg-muted p-3 rounded-lg max-w-[80%] md:max-w-lg flex gap-3">
-                                                <div className="bg-background rounded-full h-8 w-8 flex-shrink-0 flex items-center justify-center">
-                                                    <Bot className="h-5 w-5 text-primary"/>
-                                                </div>
+                                            <div className="bg-muted p-3 rounded-lg max-w-[80%] md:max-w-lg">
                                                 <div>
                                                     <p className="text-sm font-semibold">AI Assistant</p>
                                                     <p className="text-sm">{qa.answer}</p>
