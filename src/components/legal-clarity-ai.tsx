@@ -10,7 +10,6 @@ import {
   MessageSquare,
   ChevronDown,
   Info,
-  Bot,
   Lightbulb
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -47,6 +46,16 @@ const riskConfig: Record<RiskScore, { className: string; text: string }> = {
     className: 'bg-red-100 text-red-900 border-red-200 dark:bg-red-900/50 dark:text-red-100 dark:border-red-800',
     text: 'High Risk',
   },
+};
+
+const renderWithMarkdown = (text: string) => {
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    return parts.map((part, i) => {
+        if (i % 2 === 1) { // bolded part
+            return <strong key={i}>{part}</strong>;
+        }
+        return part;
+    });
 };
 
 export default function LegalClarityAI() {
@@ -208,7 +217,7 @@ export default function LegalClarityAI() {
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Analyze Document
             </Button>
-            <div className="flex items-start md:items-center gap-2 text-xs text-muted-foreground p-2 border rounded-md">
+            <div className="flex items-start gap-2 text-xs text-muted-foreground p-2 border rounded-md md:items-center">
                 <Info className="h-4 w-4 flex-shrink-0 mt-0.5 md:mt-0" />
                 <span>
                     <strong>Privacy Assurance:</strong> Your documents are processed in-memory and are not stored. We respect your privacy and confidentiality.
@@ -219,7 +228,7 @@ export default function LegalClarityAI() {
       ) : (
         <div className="w-full max-w-5xl animate-fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex flex-col-reverse md:flex-row justify-between md:items-center gap-4 mb-4">
+            <div className="flex flex-col-reverse justify-between items-center gap-4 mb-4 md:flex-row">
               <TabsList className="grid w-full grid-cols-3 md:w-auto">
                 <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
                 <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
@@ -323,16 +332,16 @@ export default function LegalClarityAI() {
                                 {qaHistory.map((qa, index) => (
                                     <div key={index} className="space-y-4">
                                         <div className="flex justify-end">
-                                            <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%] md:max-w-lg">
+                                            <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
                                                 <p className="text-sm font-semibold">You</p>
                                                 <p className="text-sm">{qa.question}</p>
                                             </div>
                                         </div>
                                         <div className="flex justify-start">
-                                            <div className="bg-muted p-3 rounded-lg max-w-[80%] md:max-w-lg">
+                                            <div className="bg-muted p-3 rounded-lg max-w-[80%]">
                                                 <div>
                                                     <p className="text-sm font-semibold">AI Assistant</p>
-                                                    <p className="text-sm">{qa.answer}</p>
+                                                    <p className="text-sm">{renderWithMarkdown(qa.answer)}</p>
                                                 </div>
                                             </div>
                                         </div>
