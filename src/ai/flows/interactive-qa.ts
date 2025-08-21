@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -35,6 +34,8 @@ const interactiveQAPrompt = ai.definePrompt({
   input: {schema: InteractiveQAInputSchema},
   output: {schema: InteractiveQAOutputSchema},
   prompt: `You are an expert legal assistant. You will answer questions about a legal document from the perspective of the user, whose role is: **{{#if userRole}}{{userRole}}{{else}}one of the parties{{/if}}**.
+
+  Use markdown for formatting. For example, use bullet points with hyphens (-) for lists and use asterisks for bolding **key terms**. Preserve paragraph breaks.
 
   Here is the document:
   {{documentContent}}

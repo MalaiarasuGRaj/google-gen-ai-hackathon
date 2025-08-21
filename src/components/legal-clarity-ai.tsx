@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useTransition } from 'react';
@@ -68,7 +67,7 @@ export default function LegalClarityAI() {
   const [rawText, setRawText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentText, setDocumentText] = useState<string>('');
-  const [clauses, setClauses] =useState<string[]>([]);
+  const [clauses, setClauses] = useState<string[]>([]);
   const [summary, setSummary] = useState<SmartSummarizationOutput | null>(null);
   const [clauseExplanations, setClauseExplanations] = useState<Record<number, ExplainClauseOutput>>({});
   const [qaHistory, setQaHistory] = useState<(InteractiveQAOutput & {question: string})[]>([]);
@@ -425,7 +424,7 @@ export default function LegalClarityAI() {
                                                   </div>
                                                   <div className="flex justify-start">
                                                       <div className="bg-card text-card-foreground p-3 rounded-lg max-w-[80%] border shadow">
-                                                          <p className="text-sm">{renderWithMarkdown(qa.answer)}</p>
+                                                          <p className="text-sm whitespace-pre-wrap">{renderWithMarkdown(qa.answer)}</p>
                                                       </div>
                                                   </div>
                                               </div>
