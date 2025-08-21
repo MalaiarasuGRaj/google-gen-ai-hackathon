@@ -292,9 +292,9 @@ export default function LegalClarityAI() {
                     </CardHeader>
                     {parties && (
                         <CardContent className='flex flex-col gap-3'>
-                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" className="justify-start">{parties[0]}</Button>
-                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" className="justify-start">{parties[1]}</Button>
-                            <Button onClick={() => handleSelectRole(null)} size="lg" className="justify-start">Neutral Analysis</Button>
+                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline-primary" className="justify-start">{parties[0]}</Button>
+                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline-primary" className="justify-start">{parties[1]}</Button>
+                            <Button onClick={() => handleSelectRole(null)} size="lg" variant="outline-primary" className="justify-start">Neutral Analysis</Button>
                         </CardContent>
                     )}
                 </Card>
@@ -473,5 +473,3 @@ export default function LegalClarityAI() {
     </div>
   );
 }
-
-    
