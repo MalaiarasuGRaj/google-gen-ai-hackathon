@@ -52,6 +52,7 @@ const riskConfig: Record<RiskScore, { className: string; text: string }> = {
 };
 
 const renderWithMarkdown = (text: string) => {
+    if (!text) return null;
     // split by bold markdown
     const parts = text.split(/(\*\*.*?\*\*)/g).filter(part => part);
 
@@ -239,7 +240,7 @@ export default function LegalClarityAI() {
                       type="file" 
                       accept=".pdf"
                       onChange={handleFileChange} 
-                      disabled={isProcessing}
+                      disabled={isProcessing || !!rawText.trim()}
                       className="text-sm file:text-sm file:font-medium file:text-primary file:bg-primary/10 hover:file:bg-primary/20"
                     />
                     {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
@@ -259,7 +260,7 @@ export default function LegalClarityAI() {
                         setSelectedFile(null);
                       }
                     }}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !!selectedFile}
                   />
                   <Button
                     onClick={handleProcessDocument}
@@ -344,7 +345,7 @@ export default function LegalClarityAI() {
                           </CardHeader>
                           <CardContent>
                             {summary ? (
-                              <p className="text-sm whitespace-pre-wrap leading-relaxed">{renderWithMarkdown(summary?.summary)}</p>
+                              <div className="text-sm whitespace-pre-wrap leading-relaxed">{renderWithMarkdown(summary?.summary)}</div>
                             ) : (
                                <div className="space-y-2">
                                   <Skeleton className="h-4 w-full" />
@@ -489,5 +490,3 @@ export default function LegalClarityAI() {
     </div>
   );
 }
-
-    
