@@ -1,4 +1,3 @@
-// This file is machine-generated - edit at your own risk!
 
 'use server';
 
@@ -40,7 +39,7 @@ const prompt = ai.definePrompt({
   For the following clause, provide:
   1. A simplified explanation.
   2. A risk score (Low, Medium, High) indicating the user's obligations.
-  3. Actionable negotiation suggestions. If the risk is Medium or High, suggest alternative, more favorable wording or specific questions the user should ask to clarify ambiguity and reduce risk. If the risk is Low, state that no changes are likely needed.
+  3. Actionable negotiation suggestions. If the risk is Medium or High, suggest alternative, more favorable wording or specific questions the user should ask to clarify ambiguity and reduce risk. If the risk is Low, your suggestion should be a single, very short sentence stating that no changes are likely needed.
 
   Clause: {{{clause}}}`,
 });
