@@ -243,7 +243,7 @@ export default function LegalClarityAI() {
                       disabled={isProcessing || !!rawText.trim()}
                       className="text-sm file:text-sm file:font-medium file:text-primary file:bg-primary/10 hover:file:bg-primary/20"
                     />
-                    {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
+                    {selectedFile && <p className="text-sm text-muted-foreground break-all">Selected file: {selectedFile.name}</p>}
                   </div>
                   
                   <div className="relative">
@@ -305,13 +305,13 @@ export default function LegalClarityAI() {
                     </CardHeader>
                     {parties && (
                         <CardContent className='flex flex-col gap-3'>
-                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline-primary" className="justify-start">{parties[0]}</Button>
-                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline-primary" className="justify-start">{parties[1]}</Button>
+                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline" className="justify-start">{parties[0]}</Button>
+                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline" className="justify-start">{parties[1]}</Button>
                             <div className="relative my-1">
                                 <p className="text-xs text-muted-foreground font-semibold text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
                                 <div className='border-t'></div>
                             </div>
-                            <Button onClick={() => handleSelectRole(null)} size="lg" variant="outline-primary" className="justify-start">Neutral Analysis</Button>
+                            <Button onClick={() => handleSelectRole(null)} size="lg" variant="outline" className="justify-start">Neutral Analysis</Button>
                         </CardContent>
                     )}
                 </Card>
