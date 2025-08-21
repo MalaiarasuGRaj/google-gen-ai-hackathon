@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import {
   FileUp,
   Loader2,
@@ -52,12 +52,20 @@ const riskConfig: Record<RiskScore, { className: string; text: string }> = {
 };
 
 const renderWithMarkdown = (text: string) => {
-    const parts = text.split(/\*\*(.*?)\*\*/g);
+    // split by bold markdown
+    const parts = text.split(/(\*\*.*?\*\*)/g).filter(part => part);
+
     return parts.map((part, i) => {
-        if (i % 2 === 1) { // bolded part
-            return <strong key={i}>{part}</strong>;
+        if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i}>{part.slice(2, -2)}</strong>;
         }
-        return part;
+        // Then split by newlines to preserve paragraphs
+        return part.split(/(\n)/g).map((line, j) => {
+            if (line === '\n') {
+                return <br key={`${i}-${j}`} />;
+            }
+            return line;
+        });
     });
 };
 
@@ -76,6 +84,7 @@ export default function LegalClarityAI() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [parties, setParties] = useState<[string, string] | null>(null);
   const [analysisState, setAnalysisState] = useState<AnalysisState>('initial');
+  const [isMounted, setIsMounted] = useState(false);
 
   const [isLoading, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('summary');
@@ -84,6 +93,10 @@ export default function LegalClarityAI() {
   const [activeAccordionItem, setActiveAccordionItem] = useState<string | undefined>();
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleProcessDocument = () => {
     if (!rawText.trim() && !selectedFile) {
@@ -204,7 +217,7 @@ export default function LegalClarityAI() {
     }
   };
 
-  const isProcessing = analysisState === 'processing' || analysisState === 'analyzing';
+  const isProcessing = analysisState === 'processing' || analysisState === 'analyzing' || !isMounted;
 
   const renderCurrentState = () => {
     switch(analysisState) {
@@ -226,7 +239,7 @@ export default function LegalClarityAI() {
                       type="file" 
                       accept=".pdf"
                       onChange={handleFileChange} 
-                      disabled={isLoading}
+                      disabled={isProcessing}
                       className="text-sm file:text-sm file:font-medium file:text-primary file:bg-primary/10 hover:file:bg-primary/20"
                     />
                     {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
@@ -246,11 +259,11 @@ export default function LegalClarityAI() {
                         setSelectedFile(null);
                       }
                     }}
-                    disabled={isLoading}
+                    disabled={isProcessing}
                   />
                   <Button
                     onClick={handleProcessDocument}
-                    disabled={isLoading || (!rawText.trim() && !selectedFile)}
+                    disabled={isProcessing || (!rawText.trim() && !selectedFile)}
                     className="w-full"
                     size="lg"
                   >
@@ -424,7 +437,7 @@ export default function LegalClarityAI() {
                                                   </div>
                                                   <div className="flex justify-start">
                                                       <div className="bg-card text-card-foreground p-3 rounded-lg max-w-[80%] border shadow">
-                                                          <p className="text-sm whitespace-pre-wrap">{renderWithMarkdown(qa.answer)}</p>
+                                                          <div className="text-sm whitespace-pre-wrap">{renderWithMarkdown(qa.answer)}</div>
                                                       </div>
                                                   </div>
                                               </div>
@@ -476,3 +489,5 @@ export default function LegalClarityAI() {
     </div>
   );
 }
+
+    
