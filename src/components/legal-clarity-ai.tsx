@@ -292,9 +292,9 @@ export default function LegalClarityAI() {
                     </CardHeader>
                     {parties && (
                         <CardContent className='flex flex-col gap-3'>
-                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline" className="justify-start">{parties[0]}</Button>
-                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline" className="justify-start">{parties[1]}</Button>
-                            <Button onClick={() => handleSelectRole(null)} size="lg">Neutral Analysis</Button>
+                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" className="justify-start">{parties[0]}</Button>
+                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" className="justify-start">{parties[1]}</Button>
+                            <Button onClick={() => handleSelectRole(null)} size="lg" className="justify-start">Neutral Analysis</Button>
                         </CardContent>
                     )}
                 </Card>
@@ -318,7 +318,7 @@ export default function LegalClarityAI() {
                             <div>
                               <CardTitle>Document Summary</CardTitle>
                               <CardDescription>
-                                An AI-generated overview from the perspective of <strong>{userRole || 'a neutral party'}</strong>.
+                                An AI-generated overview from the perspective of {renderWithMarkdown(`**${userRole || 'a neutral party'}**`)}.
                               </CardDescription>
                             </div>
                             <Button variant="ghost" size="icon" onClick={handleCopySummary} disabled={isCopied}>
@@ -452,7 +452,7 @@ export default function LegalClarityAI() {
   }
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen p-4 md:p-8">
+    <div className="flex flex-col items-center w-full min-h-screen p-4 md:p-8 bg-background">
       <div className="flex flex-col items-center w-full max-w-5xl">
         <header className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-primary/10 rounded-lg">
@@ -466,10 +466,12 @@ export default function LegalClarityAI() {
           Break down complex legal documents into simple, understandable language. Upload your document to get started.
         </p>
         
-        <div className="w-full animate-fade-in">
+        <div className="w-full animate-fade-in flex justify-center">
           {renderCurrentState()}
         </div>
       </div>
     </div>
   );
 }
+
+    
