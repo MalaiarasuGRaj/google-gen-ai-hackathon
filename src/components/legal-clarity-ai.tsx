@@ -39,15 +39,15 @@ type RiskScore = 'Low' | 'Medium' | 'High';
 
 const riskConfig: Record<RiskScore, { className: string; text: string }> = {
   Low: {
-    className: 'bg-emerald-100 text-emerald-900 border-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-800',
+    className: 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-100 dark:border-emerald-700',
     text: 'Low Risk',
   },
   Medium: {
-    className: 'bg-amber-100 text-amber-900 border-amber-200 dark:bg-amber-900/50 dark:text-amber-100 dark:border-amber-800',
+    className: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900/50 dark:text-amber-100 dark:border-amber-700',
     text: 'Medium Risk',
   },
   High: {
-    className: 'bg-red-100 text-red-900 border-red-200 dark:bg-red-900/50 dark:text-red-100 dark:border-red-800',
+    className: 'bg-red-100 text-red-900 border-red-300 dark:bg-red-900/50 dark:text-red-100 dark:border-red-700',
     text: 'High Risk',
   },
 };
@@ -207,255 +207,267 @@ export default function LegalClarityAI() {
 
   const isProcessing = analysisState === 'processing' || analysisState === 'analyzing';
 
-  return (
-    <div className="flex flex-col items-center w-full">
-      <header className="flex items-center gap-2 mb-4">
-        <Logo className="h-8 w-8 text-primary" />
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Legal Clarity AI
-        </h1>
-      </header>
-      <p className="text-muted-foreground mb-8 max-w-2xl text-center">
-        Break down complex legal documents into simple, understandable language. Upload your document to get started.
-      </p>
-
-      {analysisState === 'initial' && (
-        <Card className="w-full max-w-3xl animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileUp className="h-6 w-6" />
-              Upload or Paste Document
-            </CardTitle>
-            <CardDescription>
-              Upload a .pdf file, or paste the document text below to begin.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Input 
-                type="file" 
-                accept=".pdf"
-                onChange={handleFileChange} 
-                disabled={isLoading}
-                className="text-sm file:text-sm"
-              />
-              {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
-            </div>
-            
-            <div className="relative">
-                <p className="text-xs text-muted-foreground text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
-                <div className='border-t'></div>
-            </div>
-            <Textarea
-              placeholder="Or paste your legal document text here..."
-              className="min-h-[200px] md:min-h-[250px] text-sm"
-              value={rawText}
-              onChange={(e) => {
-                setRawText(e.target.value);
-                if (e.target.value) {
-                  setSelectedFile(null);
-                }
-              }}
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleProcessDocument}
-              disabled={isLoading || (!rawText.trim() && !selectedFile)}
-              className="w-full"
-            >
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Analyze Document
-            </Button>
-            <div className="flex items-start gap-2 text-xs text-muted-foreground p-2 border rounded-md md:items-center">
-                <Info className="h-4 w-4 flex-shrink-0 mt-0.5 md:mt-0" />
-                <span>
-                    <strong>Privacy Assurance:</strong> Your documents are processed in-memory and are not stored. We respect your privacy and confidentiality.
-                </span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {isProcessing && (
-         <Card className="w-full max-w-3xl flex flex-col items-center justify-center p-8 gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <div className='text-center'>
-                <p className="text-lg font-semibold">{analysisState === 'processing' ? 'Processing Document...' : 'Analyzing Perspective...'}</p>
-                <p className="text-muted-foreground">The AI is hard at work. This may take a moment.</p>
-            </div>
-         </Card>
-      )}
-
-      {analysisState === 'selecting_role' && parties && (
-        <Card className="w-full max-w-3xl animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-6 w-6" />
-              Select Your Perspective
-            </CardTitle>
-            <CardDescription>
-              We've identified the parties below. Choose a side to tailor the analysis to your specific role, or proceed with a neutral overview.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='flex flex-col gap-3'>
-            <Button onClick={() => handleSelectRole(parties[0])} size="lg">{parties[0]}</Button>
-            <Button onClick={() => handleSelectRole(parties[1])} size="lg">{parties[1]}</Button>
-            <Button onClick={() => handleSelectRole(null)} variant="secondary" size="lg">Neutral Analysis</Button>
-          </CardContent>
-        </Card>
-      )}
-
-
-      {analysisState === 'complete' && (
-        <div className="w-full max-w-5xl animate-fade-in">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex flex-col-reverse justify-between items-center gap-4 mb-4 md:flex-row">
-              <TabsList className="grid w-full grid-cols-3 md:w-auto">
-                <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
-                <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
-                <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&amp;A</TabsTrigger>
-              </TabsList>
-              <Button variant="outline" onClick={handleReset} className='w-full md:w-auto'>Start Over</Button>
-            </div>
-
-            <TabsContent value="summary">
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
-                  <div>
-                    <CardTitle>Document Summary</CardTitle>
-                    <CardDescription>An AI-generated overview of the key terms and obligations from your perspective as **{userRole || 'a neutral party'}**.</CardDescription>
+  const renderCurrentState = () => {
+    switch(analysisState) {
+        case 'initial':
+            return (
+                <Card className="w-full max-w-3xl shadow-lg border-border/60">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileUp className="h-6 w-6" />
+                    Upload or Paste Document
+                  </CardTitle>
+                  <CardDescription>
+                    Upload a .pdf file, or paste the document text below to begin.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Input 
+                      type="file" 
+                      accept=".pdf"
+                      onChange={handleFileChange} 
+                      disabled={isLoading}
+                      className="text-sm file:text-sm file:font-medium file:text-primary file:bg-primary/10 hover:file:bg-primary/20"
+                    />
+                    {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
                   </div>
-                  <Button variant="outline" size="icon" onClick={handleCopySummary} disabled={isCopied}>
-                    {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    <span className="sr-only">{isCopied ? 'Copied' : 'Copy'}</span>
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  {summary ? (
-                    <p className="text-sm whitespace-pre-wrap">{summary?.summary}</p>
-                  ) : (
-                     <div className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
-                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="clauses">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Clause Explanations</CardTitle>
-                  <CardDescription>Click on each clause to get a simple explanation and risk assessment from your perspective.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Accordion 
-                    type="single" 
-                    collapsible 
+                  
+                  <div className="relative">
+                      <p className="text-xs text-muted-foreground font-semibold text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
+                      <div className='border-t'></div>
+                  </div>
+                  <Textarea
+                    placeholder="Or paste your legal document text here..."
+                    className="min-h-[200px] md:min-h-[250px] text-sm focus:ring-primary/50"
+                    value={rawText}
+                    onChange={(e) => {
+                      setRawText(e.target.value);
+                      if (e.target.value) {
+                        setSelectedFile(null);
+                      }
+                    }}
+                    disabled={isLoading}
+                  />
+                  <Button
+                    onClick={handleProcessDocument}
+                    disabled={isLoading || (!rawText.trim() && !selectedFile)}
                     className="w-full"
-                    value={activeAccordionItem}
-                    onValueChange={onAccordionValueChange}>
-                    {clauses.map((clause, index) => (
-                      <AccordionItem value={`item-${index}`} key={index}>
-                        <AccordionTrigger>
-                          <span className="text-left">Clause {index + 1}</span>
-                        </AccordionTrigger>
-                        <AccordionContent className="space-y-4">
-                          <p className="text-sm text-muted-foreground italic bg-muted p-3 rounded-md">{clause}</p>
-                          {explainingClause === index ? (
-                            <div className="flex items-center text-sm text-primary"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Generating explanation...</div>
-                          ) : clauseExplanations[index] ? (
-                            <>
-                              <div className="space-y-3 p-3 border-l-4 border-primary/50 rounded-r-md bg-card">
-                                <div className="flex justify-between items-start">
-                                  <h4 className="font-semibold text-foreground flex-1 pr-2">Simplified Explanation</h4>
-                                  <Badge className={cn('text-xs whitespace-nowrap', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
-                                    {riskConfig[clauseExplanations[index].riskScore as RiskScore]?.text}
-                                  </Badge>
-                                </div>
-                                <p className="text-sm">{clauseExplanations[index].explanation}</p>
-                              </div>
-                              {clauseExplanations[index].negotiationSuggestions && clauseExplanations[index].negotiationSuggestions.length > 0 && (
-                                <div className="space-y-3 p-3 border-l-4 border-accent rounded-r-md bg-card">
-                                  <h4 className="font-semibold text-foreground flex items-center gap-2">
-                                    <Lightbulb className="h-5 w-5 text-accent"/>
-                                    Actionable Suggestions
-                                  </h4>
-                                  <ul className="list-disc pl-5 space-y-2 text-sm">
-                                    {clauseExplanations[index].negotiationSuggestions.map((suggestion, i) => (
-                                      <li key={i}>{suggestion}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </>
-                          ) : null}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
+                    size="lg"
+                  >
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Analyze Document
+                  </Button>
+                  <div className="flex items-start gap-3 text-xs text-muted-foreground p-3 border border-dashed rounded-lg md:items-center">
+                      <Info className="h-4 w-4 flex-shrink-0 mt-0.5 md:mt-0 text-primary" />
+                      <span>
+                          <strong>Privacy Assurance:</strong> Your documents are processed in-memory and are not stored. We respect your privacy and confidentiality.
+                      </span>
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="qa">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Interactive Q&amp;A</CardTitle>
-                  <CardDescription>Ask a question about the document in plain language.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-col h-[500px]">
-                        <ScrollArea className="flex-grow p-4 border rounded-md mb-4">
-                            {qaHistory.length === 0 && (
-                                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                                    <MessageSquare className="h-10 w-10 mb-2"/>
-                                    <p>Ask a question to get started.</p>
-                                </div>
-                            )}
-                            <div className="space-y-4">
-                                {qaHistory.map((qa, index) => (
-                                    <div key={index} className="space-y-4">
-                                        <div className="flex justify-end">
-                                            <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                                                <p className="text-sm font-semibold">You</p>
-                                                <p className="text-sm">{qa.question}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-start">
-                                            <div className="bg-muted p-3 rounded-lg max-w-[80%]">
-                                                <div>
-                                                    <p className="text-sm font-semibold">AI Assistant</p>
-                                                    <p className="text-sm">{renderWithMarkdown(qa.answer)}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                                {askingQuestion && <div className="flex justify-start"><Loader2 className="h-6 w-6 animate-spin text-primary"/></div>}
+            );
+        case 'processing':
+        case 'analyzing':
+            return (
+                <Card className="w-full max-w-3xl flex flex-col items-center justify-center p-8 gap-4 shadow-lg border-border/60">
+                   <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                   <div className='text-center'>
+                       <p className="text-lg font-semibold">{analysisState === 'processing' ? 'Processing Document...' : 'Analyzing Perspective...'}</p>
+                       <p className="text-muted-foreground">The AI is hard at work. This may take a moment.</p>
+                   </div>
+                </Card>
+           );
+        case 'selecting_role':
+            return (
+                <Card className="w-full max-w-3xl shadow-lg border-border/60">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-6 w-6" />
+                        Select Your Perspective
+                      </CardTitle>
+                      <CardDescription>
+                        We've identified the parties below. Choose a side to tailor the analysis to your specific role, or proceed with a neutral overview.
+                      </CardDescription>
+                    </CardHeader>
+                    {parties && (
+                        <CardContent className='flex flex-col gap-3'>
+                            <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline" className="justify-start">{parties[0]}</Button>
+                            <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline" className="justify-start">{parties[1]}</Button>
+                            <Button onClick={() => handleSelectRole(null)} size="lg">Neutral Analysis</Button>
+                        </CardContent>
+                    )}
+                </Card>
+            );
+        case 'complete':
+            return (
+                <div className="w-full max-w-5xl">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                      <div className="flex flex-col-reverse justify-between items-center gap-4 mb-4 md:flex-row">
+                        <TabsList className="grid w-full grid-cols-3 md:w-auto shadow-inner bg-muted">
+                          <TabsTrigger value="summary"><BookText className="mr-2 h-4 w-4"/>Summary</TabsTrigger>
+                          <TabsTrigger value="clauses"><ChevronDown className="mr-2 h-4 w-4"/>Clauses</TabsTrigger>
+                          <TabsTrigger value="qa"><MessageSquare className="mr-2 h-4 w-4"/>Q&amp;A</TabsTrigger>
+                        </TabsList>
+                        <Button variant="outline" onClick={handleReset} className='w-full md:w-auto'>Start Over</Button>
+                      </div>
+          
+                      <TabsContent value="summary">
+                        <Card className="shadow-md border-border/60">
+                          <CardHeader className="flex flex-row items-start justify-between">
+                            <div>
+                              <CardTitle>Document Summary</CardTitle>
+                              <CardDescription>An AI-generated overview from the perspective of **{userRole || 'a neutral party'}**.</CardDescription>
                             </div>
-                        </ScrollArea>
-                        <form onSubmit={handleAskQuestion} className="flex gap-2">
-                            <Input
-                            value={currentQuestion}
-                            onChange={(e) => setCurrentQuestion(e.target.value)}
-                            placeholder="e.g., What is the termination clause?"
-                            disabled={askingQuestion}
-                            />
-                            <Button type="submit" disabled={askingQuestion || !currentQuestion.trim()}>
-                                {askingQuestion ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                                Ask
+                            <Button variant="ghost" size="icon" onClick={handleCopySummary} disabled={isCopied}>
+                              {isCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                              <span className="sr-only">{isCopied ? 'Copied' : 'Copy'}</span>
                             </Button>
-                        </form>
-                    </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                          </CardHeader>
+                          <CardContent>
+                            {summary ? (
+                              <p className="text-sm whitespace-pre-wrap leading-relaxed">{summary?.summary}</p>
+                            ) : (
+                               <div className="space-y-2">
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-full" />
+                                  <Skeleton className="h-4 w-3/4" />
+                               </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+          
+                      <TabsContent value="clauses">
+                        <Card className="shadow-md border-border/60">
+                          <CardHeader>
+                            <CardTitle>Clause Explanations</CardTitle>
+                            <CardDescription>Click on each clause to get a simple explanation and risk assessment from your perspective.</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <Accordion 
+                              type="single" 
+                              collapsible 
+                              className="w-full"
+                              value={activeAccordionItem}
+                              onValueChange={onAccordionValueChange}>
+                              {clauses.map((clause, index) => (
+                                <AccordionItem value={`item-${index}`} key={index}>
+                                  <AccordionTrigger className="text-left hover:no-underline">
+                                    <span className="flex-1 text-left font-semibold">Clause {index + 1}</span>
+                                  </AccordionTrigger>
+                                  <AccordionContent className="space-y-4">
+                                    <p className="text-sm text-muted-foreground italic bg-secondary p-4 rounded-md shadow-inner">{clause}</p>
+                                    {explainingClause === index ? (
+                                      <div className="flex items-center text-sm text-primary"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Generating explanation...</div>
+                                    ) : clauseExplanations[index] ? (
+                                      <>
+                                        <div className="space-y-3 p-4 border rounded-md shadow-sm">
+                                          <div className="flex justify-between items-start">
+                                            <h4 className="font-semibold text-foreground flex-1 pr-2">Simplified Explanation</h4>
+                                            <Badge variant="outline" className={cn('text-xs whitespace-nowrap', riskConfig[clauseExplanations[index].riskScore as RiskScore]?.className)}>
+                                              {riskConfig[clauseExplanations[index].riskScore as RiskScore]?.text}
+                                            </Badge>
+                                          </div>
+                                          <p className="text-sm">{clauseExplanations[index].explanation}</p>
+                                        </div>
+                                        {clauseExplanations[index].negotiationSuggestions && clauseExplanations[index].negotiationSuggestions.length > 0 && (
+                                          <div className="space-y-3 p-4 border-l-4 border-primary rounded-r-md bg-card shadow-sm">
+                                            <h4 className="font-semibold text-foreground flex items-center gap-2">
+                                              <Lightbulb className="h-5 w-5 text-primary"/>
+                                              Actionable Suggestions
+                                            </h4>
+                                            <ul className="list-disc pl-5 space-y-2 text-sm">
+                                              {clauseExplanations[index].negotiationSuggestions.map((suggestion, i) => (
+                                                <li key={i}>{suggestion}</li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </>
+                                    ) : null}
+                                  </AccordionContent>
+                                </AccordionItem>
+                              ))}
+                            </Accordion>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+          
+                      <TabsContent value="qa">
+                        <Card className="shadow-md border-border/60">
+                          <CardHeader>
+                            <CardTitle>Interactive Q&amp;A</CardTitle>
+                            <CardDescription>Ask a question about the document in plain language.</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                              <div className="flex flex-col h-[500px]">
+                                  <ScrollArea className="flex-grow p-4 border rounded-t-md mb-0 bg-muted/30">
+                                      {qaHistory.length === 0 && (
+                                          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                                              <MessageSquare className="h-10 w-10 mb-2"/>
+                                              <p>Ask a question to get started.</p>
+                                          </div>
+                                      )}
+                                      <div className="space-y-4">
+                                          {qaHistory.map((qa, index) => (
+                                              <div key={index} className="space-y-4">
+                                                  <div className="flex justify-end">
+                                                      <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%] shadow">
+                                                          <p className="text-sm">{qa.question}</p>
+                                                      </div>
+                                                  </div>
+                                                  <div className="flex justify-start">
+                                                      <div className="bg-card text-card-foreground p-3 rounded-lg max-w-[80%] border shadow">
+                                                          <p className="text-sm">{renderWithMarkdown(qa.answer)}</p>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          ))}
+                                          {askingQuestion && <div className="flex justify-start"><Loader2 className="h-6 w-6 animate-spin text-primary"/></div>}
+                                      </div>
+                                  </ScrollArea>
+                                  <form onSubmit={handleAskQuestion} className="flex gap-0 border rounded-b-md border-t-0 p-2 bg-card">
+                                      <Input
+                                      value={currentQuestion}
+                                      onChange={(e) => setCurrentQuestion(e.target.value)}
+                                      placeholder="e.g., What is the termination clause?"
+                                      disabled={askingQuestion}
+                                      className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                      />
+                                      <Button type="submit" disabled={askingQuestion || !currentQuestion.trim()}>
+                                          {askingQuestion ? <Loader2 className="h-4 w-4 animate-spin"/> : "Ask"}
+                                      </Button>
+                                  </form>
+                              </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+                    </Tabs>
+                </div>
+            )
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center w-full min-h-screen p-4 md:p-8">
+      <div className="flex flex-col items-center w-full max-w-5xl">
+        <header className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Logo className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Legal Clarity AI
+          </h1>
+        </header>
+        <p className="text-muted-foreground mb-8 max-w-2xl text-center">
+          Break down complex legal documents into simple, understandable language. Upload your document to get started.
+        </p>
+        
+        <div className="w-full animate-fade-in">
+          {renderCurrentState()}
         </div>
-      )}
+      </div>
     </div>
   );
 }
