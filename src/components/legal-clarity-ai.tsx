@@ -294,6 +294,10 @@ export default function LegalClarityAI() {
                         <CardContent className='flex flex-col gap-3'>
                             <Button onClick={() => handleSelectRole(parties[0])} size="lg" variant="outline-primary" className="justify-start">{parties[0]}</Button>
                             <Button onClick={() => handleSelectRole(parties[1])} size="lg" variant="outline-primary" className="justify-start">{parties[1]}</Button>
+                            <div className="relative my-1">
+                                <p className="text-xs text-muted-foreground font-semibold text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
+                                <div className='border-t'></div>
+                            </div>
                             <Button onClick={() => handleSelectRole(null)} size="lg" variant="outline-primary" className="justify-start">Neutral Analysis</Button>
                         </CardContent>
                     )}
