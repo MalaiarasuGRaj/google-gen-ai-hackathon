@@ -24,6 +24,8 @@ export async function processDocumentAction(
 ): Promise<ActionResult<ProcessDocumentOutput>> {
   const file = formData.get('file') as File | null;
   const text = formData.get('text') as string | null;
+  const userRole = formData.get('userRole') as string | null;
+
 
   let documentText: string;
 
@@ -47,7 +49,7 @@ export async function processDocumentAction(
 
   try {
     const [summary, clauseData] = await Promise.all([
-      smartSummarization({ documentText }),
+      smartSummarization({ documentText, userRole: userRole ?? undefined }),
       identifyClauses({ documentText })
     ]);
     
@@ -60,6 +62,7 @@ export async function processDocumentAction(
 
 const explainClauseSchema = z.object({
   clause: z.string().min(1, 'Clause cannot be empty.'),
+  userRole: z.string().optional(),
 });
 
 export async function explainClauseAction(
@@ -82,6 +85,7 @@ export async function explainClauseAction(
 const askQuestionSchema = z.object({
   documentContent: z.string().min(1, 'Document content cannot be empty.'),
   question: z.string().min(1, 'Question cannot be empty.'),
+  userRole: z.string().optional(),
 });
 
 export async function askQuestionAction(

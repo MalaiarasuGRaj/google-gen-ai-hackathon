@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Copy,
   Check,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -70,6 +71,7 @@ export default function LegalClarityAI() {
   const [qaHistory, setQaHistory] = useState<(InteractiveQAOutput & {question: string})[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
   const [isLoading, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('summary');
@@ -92,6 +94,7 @@ export default function LegalClarityAI() {
       } else {
         formData.append('text', rawText);
       }
+      formData.append('userRole', userRole);
 
       const result = await processDocumentAction(formData);
 
@@ -119,7 +122,7 @@ export default function LegalClarityAI() {
     if (!clause || clauseExplanations[clauseIndex]) return;
 
     setExplainingClause(clauseIndex);
-    const result = await explainClauseAction({ clause });
+    const result = await explainClauseAction({ clause, userRole });
     if (result.success) {
       setClauseExplanations(prev => ({ ...prev, [clauseIndex]: result.data }));
     } else {
@@ -135,7 +138,7 @@ export default function LegalClarityAI() {
     setAskingQuestion(true);
     const questionToAsk = currentQuestion;
     setCurrentQuestion('');
-    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk });
+    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk, userRole });
     
     if (result.success) {
       setQaHistory(prev => [...prev, { question: questionToAsk, ...result.data }]);
@@ -163,6 +166,7 @@ export default function LegalClarityAI() {
     setQaHistory([]);
     setCurrentQuestion('');
     setActiveTab('summary');
+    setUserRole('');
   };
 
   const handleCopySummary = () => {
@@ -183,7 +187,7 @@ export default function LegalClarityAI() {
         </h1>
       </header>
       <p className="text-muted-foreground mb-8 max-w-2xl text-center">
-        Break down complex legal documents into simple, understandable language. Upload your document or paste the text to get started.
+        Break down complex legal documents into simple, understandable language. Upload your document, specify your role, and get started.
       </p>
 
       {!documentText ? (
@@ -194,20 +198,35 @@ export default function LegalClarityAI() {
               Upload or Paste Document
             </CardTitle>
             <CardDescription>
-              Upload a .pdf file, or paste the document text below.
+              Upload a .pdf file, or paste the document text below. For the best results, tell us your role in the agreement.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Input 
-                type="file" 
-                accept=".pdf"
-                onChange={handleFileChange} 
-                disabled={isLoading}
-                className="text-sm"
-              />
-              {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
-              <p className="text-xs text-muted-foreground text-center">OR</p>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className="space-y-2">
+                  <Input 
+                    type="file" 
+                    accept=".pdf"
+                    onChange={handleFileChange} 
+                    disabled={isLoading}
+                    className="text-sm"
+                  />
+                  {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
+                </div>
+                <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="Your Role (e.g., Tenant, Employee)"
+                        value={userRole}
+                        onChange={(e) => setUserRole(e.target.value)}
+                        disabled={isLoading}
+                        className="pl-9"
+                    />
+                </div>
+            </div>
+            <div className="relative">
+                <p className="text-xs text-muted-foreground text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
+                <div className='border-t'></div>
             </div>
             <Textarea
               placeholder="Or paste your legal document text here..."
@@ -254,7 +273,7 @@ export default function LegalClarityAI() {
                 <CardHeader className="flex flex-row items-start justify-between">
                   <div>
                     <CardTitle>Document Summary</CardTitle>
-                    <CardDescription>An AI-generated overview of the key terms and obligations.</CardDescription>
+                    <CardDescription>An AI-generated overview of the key terms and obligations from your perspective as **{userRole || 'a party'}**.</CardDescription>
                   </div>
                   <Button variant="outline" size="icon" onClick={handleCopySummary} disabled={isCopied || isLoading}>
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

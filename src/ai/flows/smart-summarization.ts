@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -15,6 +16,7 @@ const SmartSummarizationInputSchema = z.object({
   documentText: z
     .string()
     .describe('The text content of the legal document to summarize.'),
+  userRole: z.string().optional().describe('The user\'s role in the document (e.g., tenant, licensor).'),
 });
 export type SmartSummarizationInput = z.infer<typeof SmartSummarizationInputSchema>;
 
@@ -37,9 +39,9 @@ const prompt = ai.definePrompt({
   name: 'smartSummarizationPrompt',
   input: {schema: SmartSummarizationInputSchema},
   output: {schema: SmartSummarizationOutputSchema},
-  prompt: `You are an AI legal assistant tasked with summarizing legal documents.
+  prompt: `You are an AI legal assistant tasked with summarizing legal documents. The user's role is: **{{#if userRole}}{{userRole}}{{else}}one of the parties{{/if}}**.
 
-  Please provide a concise summary of the following legal document, highlighting key terms and obligations:
+  Please provide a concise summary of the following legal document. The summary should be written from the user's perspective, highlighting the key terms, obligations, and rights that affect them directly.
 
   Document:
   {{documentText}}`,
