@@ -8,6 +8,7 @@ import { interactiveQA, InteractiveQAInput, InteractiveQAOutput } from '@/ai/flo
 import { identifyClauses } from '@/ai/flows/identify-clauses';
 import { identifyParties, IdentifyPartiesOutput } from '@/ai/flows/identify-parties';
 import { extractText, normalizeText } from './document-parser';
+import { validateDocument } from '@/ai/flows/validate-document';
 
 // Re-export types for client-side usage
 export type { ExplainClauseOutput, InteractiveQAOutput, SmartSummarizationOutput };
@@ -47,6 +48,11 @@ export async function processDocumentAction(
   }
 
   try {
+    const { isLegalDoc } = await validateDocument({ documentText });
+    if (!isLegalDoc) {
+      return { success: false, error: 'The uploaded document does not appear to be a legal document. Please upload a valid legal document.' };
+    }
+
     const [parties, clauseData] = await Promise.all([
       identifyParties({ documentText }),
       identifyClauses({ documentText })
