@@ -13,7 +13,7 @@ import {
   Lightbulb,
   Copy,
   Check,
-  User,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,8 +31,9 @@ import {
   processDocumentAction,
   explainClauseAction,
   askQuestionAction,
+  summarizeDocumentAction
 } from '@/lib/actions';
-import type { ExplainClauseOutput, InteractiveQAOutput, ProcessDocumentOutput } from '@/lib/actions';
+import type { ExplainClauseOutput, InteractiveQAOutput, ProcessDocumentOutput, SmartSummarizationOutput } from '@/lib/actions';
 
 type RiskScore = 'Low' | 'Medium' | 'High';
 
@@ -61,17 +62,21 @@ const renderWithMarkdown = (text: string) => {
     });
 };
 
+type AnalysisState = 'initial' | 'processing' | 'selecting_role' | 'analyzing' | 'complete';
+
 export default function LegalClarityAI() {
   const [rawText, setRawText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentText, setDocumentText] = useState<string>('');
   const [clauses, setClauses] =useState<string[]>([]);
-  const [summary, setSummary] = useState<ProcessDocumentOutput['summary'] | null>(null);
+  const [summary, setSummary] = useState<SmartSummarizationOutput | null>(null);
   const [clauseExplanations, setClauseExplanations] = useState<Record<number, ExplainClauseOutput>>({});
   const [qaHistory, setQaHistory] = useState<(InteractiveQAOutput & {question: string})[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [parties, setParties] = useState<[string, string] | null>(null);
+  const [analysisState, setAnalysisState] = useState<AnalysisState>('initial');
 
   const [isLoading, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('summary');
@@ -86,7 +91,8 @@ export default function LegalClarityAI() {
       toast({ title: 'Error', description: 'Please upload a file or paste text.', variant: 'destructive' });
       return;
     }
-
+    
+    setAnalysisState('processing');
     startTransition(async () => {
       const formData = new FormData();
       if (selectedFile) {
@@ -94,18 +100,37 @@ export default function LegalClarityAI() {
       } else {
         formData.append('text', rawText);
       }
-      formData.append('userRole', userRole);
 
       const result = await processDocumentAction(formData);
 
       if (result.success) {
-        const { documentText: processedText, summary: summaryData, clauses: parsedClauses } = result.data;
+        const { documentText: processedText, clauses: parsedClauses, parties: identifiedParties } = result.data;
         setDocumentText(processedText);
         setClauses(parsedClauses);
-        setSummary(summaryData);
+        setParties([identifiedParties.partyOne, identifiedParties.partyTwo]);
+        setAnalysisState('selecting_role');
       } else {
         toast({ title: 'Processing Failed', description: result.error, variant: 'destructive' });
+        setAnalysisState('initial');
       }
+    });
+  };
+
+  const handleSelectRole = (role: string | null) => {
+    setUserRole(role);
+    setAnalysisState('analyzing');
+    startTransition(async () => {
+        const result = await summarizeDocumentAction({documentText, userRole: role || undefined });
+        if(result.success) {
+            setSummary(result.data);
+            setClauseExplanations({});
+            setQaHistory([]);
+            setActiveTab('summary');
+            setAnalysisState('complete');
+        } else {
+            toast({ title: 'Analysis Failed', description: result.error, variant: 'destructive' });
+            setAnalysisState('selecting_role');
+        }
     });
   };
   
@@ -119,7 +144,7 @@ export default function LegalClarityAI() {
 
   const handleExplainClause = async (clauseIndex: number) => {
     const clause = clauses[clauseIndex];
-    if (!clause || clauseExplanations[clauseIndex]) return;
+    if (!clause || clauseExplanations[clauseIndex] || !userRole) return;
 
     setExplainingClause(clauseIndex);
     const result = await explainClauseAction({ clause, userRole });
@@ -138,7 +163,7 @@ export default function LegalClarityAI() {
     setAskingQuestion(true);
     const questionToAsk = currentQuestion;
     setCurrentQuestion('');
-    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk, userRole });
+    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk, userRole: userRole || undefined });
     
     if (result.success) {
       setQaHistory(prev => [...prev, { question: questionToAsk, ...result.data }]);
@@ -166,7 +191,9 @@ export default function LegalClarityAI() {
     setQaHistory([]);
     setCurrentQuestion('');
     setActiveTab('summary');
-    setUserRole('');
+    setUserRole(null);
+    setParties(null);
+    setAnalysisState('initial');
   };
 
   const handleCopySummary = () => {
@@ -178,6 +205,8 @@ export default function LegalClarityAI() {
     }
   };
 
+  const isProcessing = analysisState === 'processing' || analysisState === 'analyzing';
+
   return (
     <div className="flex flex-col items-center w-full">
       <header className="flex items-center gap-2 mb-4">
@@ -187,10 +216,10 @@ export default function LegalClarityAI() {
         </h1>
       </header>
       <p className="text-muted-foreground mb-8 max-w-2xl text-center">
-        Break down complex legal documents into simple, understandable language. Upload your document, specify your role, and get started.
+        Break down complex legal documents into simple, understandable language. Upload your document to get started.
       </p>
 
-      {!documentText ? (
+      {analysisState === 'initial' && (
         <Card className="w-full max-w-3xl animate-fade-in">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -198,32 +227,21 @@ export default function LegalClarityAI() {
               Upload or Paste Document
             </CardTitle>
             <CardDescription>
-              Upload a .pdf file, or paste the document text below. For the best results, tell us your role in the agreement.
+              Upload a .pdf file, or paste the document text below to begin.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className="space-y-2">
-                  <Input 
-                    type="file" 
-                    accept=".pdf"
-                    onChange={handleFileChange} 
-                    disabled={isLoading}
-                    className="text-sm"
-                  />
-                  {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
-                </div>
-                <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Your Role (e.g., Tenant, Employee)"
-                        value={userRole}
-                        onChange={(e) => setUserRole(e.target.value)}
-                        disabled={isLoading}
-                        className="pl-9"
-                    />
-                </div>
+            <div className="space-y-2">
+              <Input 
+                type="file" 
+                accept=".pdf"
+                onChange={handleFileChange} 
+                disabled={isLoading}
+                className="text-sm file:text-sm"
+              />
+              {selectedFile && <p className="text-sm text-muted-foreground">Selected file: {selectedFile.name}</p>}
             </div>
+            
             <div className="relative">
                 <p className="text-xs text-muted-foreground text-center absolute -top-2.5 left-1/2 -translate-x-1/2 bg-card px-2">OR</p>
                 <div className='border-t'></div>
@@ -256,7 +274,39 @@ export default function LegalClarityAI() {
             </div>
           </CardContent>
         </Card>
-      ) : (
+      )}
+
+      {isProcessing && (
+         <Card className="w-full max-w-3xl flex flex-col items-center justify-center p-8 gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <div className='text-center'>
+                <p className="text-lg font-semibold">{analysisState === 'processing' ? 'Processing Document...' : 'Analyzing Perspective...'}</p>
+                <p className="text-muted-foreground">The AI is hard at work. This may take a moment.</p>
+            </div>
+         </Card>
+      )}
+
+      {analysisState === 'selecting_role' && parties && (
+        <Card className="w-full max-w-3xl animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-6 w-6" />
+              Select Your Perspective
+            </CardTitle>
+            <CardDescription>
+              We've identified the parties below. Choose a side to tailor the analysis to your specific role, or proceed with a neutral overview.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='flex flex-col gap-3'>
+            <Button onClick={() => handleSelectRole(parties[0])} size="lg">{parties[0]}</Button>
+            <Button onClick={() => handleSelectRole(parties[1])} size="lg">{parties[1]}</Button>
+            <Button onClick={() => handleSelectRole(null)} variant="secondary" size="lg">Neutral Analysis</Button>
+          </CardContent>
+        </Card>
+      )}
+
+
+      {analysisState === 'complete' && (
         <div className="w-full max-w-5xl animate-fade-in">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="flex flex-col-reverse justify-between items-center gap-4 mb-4 md:flex-row">
@@ -273,22 +323,22 @@ export default function LegalClarityAI() {
                 <CardHeader className="flex flex-row items-start justify-between">
                   <div>
                     <CardTitle>Document Summary</CardTitle>
-                    <CardDescription>An AI-generated overview of the key terms and obligations from your perspective as **{userRole || 'a party'}**.</CardDescription>
+                    <CardDescription>An AI-generated overview of the key terms and obligations from your perspective as **{userRole || 'a neutral party'}**.</CardDescription>
                   </div>
-                  <Button variant="outline" size="icon" onClick={handleCopySummary} disabled={isCopied || isLoading}>
+                  <Button variant="outline" size="icon" onClick={handleCopySummary} disabled={isCopied}>
                     {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     <span className="sr-only">{isCopied ? 'Copied' : 'Copy'}</span>
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  {isLoading && !summary ? (
+                  {summary ? (
+                    <p className="text-sm whitespace-pre-wrap">{summary?.summary}</p>
+                  ) : (
                      <div className="space-y-2">
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-full" />
                         <Skeleton className="h-4 w-3/4" />
                      </div>
-                  ) : (
-                    <p className="text-sm whitespace-pre-wrap">{summary?.summary}</p>
                   )}
                 </CardContent>
               </Card>
@@ -298,7 +348,7 @@ export default function LegalClarityAI() {
               <Card>
                 <CardHeader>
                   <CardTitle>Clause Explanations</CardTitle>
-                  <CardDescription>Click on each clause to get a simple explanation and risk assessment.</CardDescription>
+                  <CardDescription>Click on each clause to get a simple explanation and risk assessment from your perspective.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Accordion 

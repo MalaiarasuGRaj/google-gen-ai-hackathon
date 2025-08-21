@@ -6,14 +6,15 @@ import { smartSummarization, SmartSummarizationInput, SmartSummarizationOutput }
 import { explainClause, ExplainClauseInput, ExplainClauseOutput } from '@/ai/flows/clause-explanation';
 import { interactiveQA, InteractiveQAInput, InteractiveQAOutput } from '@/ai/flows/interactive-qa';
 import { identifyClauses } from '@/ai/flows/identify-clauses';
+import { identifyParties, IdentifyPartiesOutput } from '@/ai/flows/identify-parties';
 import { extractText, normalizeText } from './document-parser';
 
 // Re-export types for client-side usage
-export type { ExplainClauseOutput, InteractiveQAOutput };
+export type { ExplainClauseOutput, InteractiveQAOutput, SmartSummarizationOutput };
 
 export type ProcessDocumentOutput = {
   documentText: string;
-  summary: SmartSummarizationOutput;
+  parties: IdentifyPartiesOutput;
   clauses: string[];
 }
 
@@ -24,8 +25,6 @@ export async function processDocumentAction(
 ): Promise<ActionResult<ProcessDocumentOutput>> {
   const file = formData.get('file') as File | null;
   const text = formData.get('text') as string | null;
-  const userRole = formData.get('userRole') as string | null;
-
 
   let documentText: string;
 
@@ -48,15 +47,37 @@ export async function processDocumentAction(
   }
 
   try {
-    const [summary, clauseData] = await Promise.all([
-      smartSummarization({ documentText, userRole: userRole ?? undefined }),
+    const [parties, clauseData] = await Promise.all([
+      identifyParties({ documentText }),
       identifyClauses({ documentText })
     ]);
     
-    return { success: true, data: { documentText, summary, clauses: clauseData.clauses } };
+    return { success: true, data: { documentText, parties, clauses: clauseData.clauses } };
   } catch (e) {
     console.error(e);
     return { success: false, error: 'An unexpected error occurred during document analysis.' };
+  }
+}
+
+const summarizeDocumentSchema = z.object({
+  documentText: z.string().min(1, 'Document text cannot be empty.'),
+  userRole: z.string().optional(),
+});
+
+export async function summarizeDocumentAction(
+  data: SmartSummarizationInput
+): Promise<ActionResult<SmartSummarizationOutput>> {
+  const validation = summarizeDocumentSchema.safeParse(data);
+  if (!validation.success) {
+    return { success: false, error: validation.error.errors[0].message };
+  }
+
+  try {
+    const result = await smartSummarization(validation.data);
+    return { success: true, data: result };
+  } catch (e) {
+    console.error(e);
+    return { success: false, error: 'An unexpected error occurred during summarization.' };
   }
 }
 
