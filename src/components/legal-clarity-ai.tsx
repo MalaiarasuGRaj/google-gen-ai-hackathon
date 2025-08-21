@@ -317,7 +317,9 @@ export default function LegalClarityAI() {
                           <CardHeader className="flex flex-row items-start justify-between">
                             <div>
                               <CardTitle>Document Summary</CardTitle>
-                              <CardDescription>An AI-generated overview from the perspective of **{userRole || 'a neutral party'}**.</CardDescription>
+                              <CardDescription>
+                                An AI-generated overview from the perspective of <strong>{userRole || 'a neutral party'}</strong>.
+                              </CardDescription>
                             </div>
                             <Button variant="ghost" size="icon" onClick={handleCopySummary} disabled={isCopied}>
                               {isCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
