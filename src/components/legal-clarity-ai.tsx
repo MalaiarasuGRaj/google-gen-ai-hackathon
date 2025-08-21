@@ -332,7 +332,7 @@ export default function LegalClarityAI() {
                           </CardHeader>
                           <CardContent>
                             {summary ? (
-                              <p className="text-sm whitespace-pre-wrap leading-relaxed">{summary?.summary}</p>
+                              <p className="text-sm whitespace-pre-wrap leading-relaxed">{renderWithMarkdown(summary?.summary)}</p>
                             ) : (
                                <div className="space-y-2">
                                   <Skeleton className="h-4 w-full" />

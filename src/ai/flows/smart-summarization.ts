@@ -41,7 +41,7 @@ const prompt = ai.definePrompt({
   output: {schema: SmartSummarizationOutputSchema},
   prompt: `You are an AI legal assistant tasked with summarizing legal documents. The user's role is: **{{#if userRole}}{{userRole}}{{else}}one of the parties{{/if}}**.
 
-  Please provide a concise summary of the following legal document. The summary should be written from the user's perspective, highlighting the key terms, obligations, and rights that affect them directly.
+  Please provide a concise summary of the following legal document. The summary should be written from the user's perspective, highlighting the key terms, obligations, and rights that affect them directly. **Use markdown to bold important keywords and phrases using asterisks (e.g., \`**Key Term**\`).**
 
   Document:
   {{documentText}}`,
