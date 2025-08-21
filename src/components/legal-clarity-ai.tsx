@@ -10,7 +10,9 @@ import {
   MessageSquare,
   ChevronDown,
   Info,
-  Lightbulb
+  Lightbulb,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,6 +69,7 @@ export default function LegalClarityAI() {
   const [clauseExplanations, setClauseExplanations] = useState<Record<number, ExplainClauseOutput>>({});
   const [qaHistory, setQaHistory] = useState<(InteractiveQAOutput & {question: string})[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const [isLoading, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('summary');
@@ -162,6 +165,15 @@ export default function LegalClarityAI() {
     setActiveTab('summary');
   };
 
+  const handleCopySummary = () => {
+    if (summary?.summary) {
+      navigator.clipboard.writeText(summary.summary);
+      setIsCopied(true);
+      toast({title: 'Copied!', description: 'Summary has been copied to your clipboard.'});
+      setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full">
       <header className="flex items-center gap-2 mb-4">
@@ -239,9 +251,15 @@ export default function LegalClarityAI() {
 
             <TabsContent value="summary">
               <Card>
-                <CardHeader>
-                  <CardTitle>Document Summary</CardTitle>
-                  <CardDescription>An AI-generated overview of the key terms and obligations.</CardDescription>
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle>Document Summary</CardTitle>
+                    <CardDescription>An AI-generated overview of the key terms and obligations.</CardDescription>
+                  </div>
+                  <Button variant="outline" size="icon" onClick={handleCopySummary} disabled={isCopied || isLoading}>
+                    {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    <span className="sr-only">{isCopied ? 'Copied' : 'Copy'}</span>
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   {isLoading && !summary ? (
