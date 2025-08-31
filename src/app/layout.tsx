@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Legal Clarity AI',
-  description: 'Upload, analyze, and understand your legal documents with the power of AI.',
+  description: 'Demystify legal documents. Get AI-powered summaries, clause explanations, and answers in seconds.',
 };
 
 export default function RootLayout({
