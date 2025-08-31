@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
-  title: 'NyayaSaarathi',
+  title: 'VakilSaab',
   description: 'Demystify legal documents. Get AI-powered summaries, clause explanations, and answers in seconds.',
 };
 
