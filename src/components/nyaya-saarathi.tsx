@@ -72,7 +72,7 @@ const renderWithMarkdown = (text: string) => {
 
 type AnalysisState = 'initial' | 'processing' | 'selecting_role' | 'analyzing' | 'complete';
 
-export default function LegalClarityAI() {
+export default function NyayaSaarathi() {
   const [rawText, setRawText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [documentText, setDocumentText] = useState<string>('');
@@ -476,7 +476,7 @@ export default function LegalClarityAI() {
             <Logo className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Legal Clarity AI
+            NyayaSaarathi
           </h1>
         </header>
         <p className="text-muted-foreground mb-8 max-w-2xl text-center">
