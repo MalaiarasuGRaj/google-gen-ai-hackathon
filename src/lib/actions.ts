@@ -2,11 +2,11 @@
 'use server';
 
 import { z } from 'zod';
-import { smartSummarization, SmartSummarizationInput, SmartSummarizationOutput } from '@/ai/flows/smart-summarization';
-import { explainClause, ExplainClauseInput, ExplainClauseOutput } from '@/ai/flows/clause-explanation';
-import { interactiveQA, InteractiveQAInput, InteractiveQAOutput } from '@/ai/flows/interactive-qa';
+import { smartSummarization, type SmartSummarizationInput, type SmartSummarizationOutput } from '@/ai/flows/smart-summarization';
+import { explainClause, type ExplainClauseInput, type ExplainClauseOutput } from '@/ai/flows/clause-explanation';
+import { interactiveQA, type InteractiveQAInput, type InteractiveQAOutput } from '@/ai/flows/interactive-qa';
 import { identifyClauses } from '@/ai/flows/identify-clauses';
-import { identifyParties, IdentifyPartiesOutput } from '@/ai/flows/identify-parties';
+import { identifyParties, type IdentifyPartiesOutput } from '@/ai/flows/identify-parties';
 import { extractText, normalizeText } from './document-parser';
 import { validateDocument } from '@/ai/flows/validate-document';
 
