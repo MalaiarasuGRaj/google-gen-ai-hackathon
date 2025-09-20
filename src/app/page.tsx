@@ -18,7 +18,7 @@ export default function LandingPage() {
           </h1>
         </div>
         <Button asChild>
-          <Link href="/tool">Get Started</Link>
+          <Link href="/tool" prefetch={false}>Get Started</Link>
         </Button>
       </header>
 
@@ -34,7 +34,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-10">
               <Button asChild size="lg" className="shadow-lg">
-                <Link href="/tool">
+                <Link href="/tool" prefetch={false}>
                   <Sparkles className="mr-2" />
                   Analyze Your Document for Free
                 </Link>
