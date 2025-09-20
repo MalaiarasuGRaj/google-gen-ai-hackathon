@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -17,6 +18,7 @@ const InteractiveQAInputSchema = z.object({
     .describe('The content of the legal document to ask questions about.'),
   question: z.string().describe('The question to ask about the document.'),
   userRole: z.string().optional().describe('The user\'s role in the document (e.g., tenant, licensor).'),
+  language: z.string().optional().describe('The language for the output (e.g., "Hindi", "Tamil"). Defaults to English if not provided.'),
 });
 export type InteractiveQAInput = z.infer<typeof InteractiveQAInputSchema>;
 
@@ -35,6 +37,8 @@ const interactiveQAPrompt = ai.definePrompt({
   output: {schema: InteractiveQAOutputSchema},
   prompt: `You are an expert legal assistant. You will answer questions about a legal document from the perspective of the user, whose role is: **{{#if userRole}}{{userRole}}{{else}}one of the parties{{/if}}**.
 
+  The user has requested the output in the following language: **{{#if language}}{{language}}{{else}}English{{/if}}**. All of your generated response must be in this language.
+
   Use markdown for formatting. For example, use bullet points with hyphens (-) for lists and use asterisks for bolding **key terms**. Preserve paragraph breaks.
 
   Here is the document:
@@ -42,7 +46,7 @@ const interactiveQAPrompt = ai.definePrompt({
 
   Question: {{question}}
 
-  Answer (from the user's perspective): `,
+  Answer (from the user's perspective, in the requested language): `,
 });
 
 const interactiveQAFlow = ai.defineFlow(

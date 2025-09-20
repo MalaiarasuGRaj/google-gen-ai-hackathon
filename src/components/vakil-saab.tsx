@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useTransition, useEffect } from 'react';
@@ -13,6 +14,7 @@ import {
   Copy,
   Check,
   Users,
+  Languages,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +35,8 @@ import {
   summarizeDocumentAction
 } from '@/lib/actions';
 import type { ExplainClauseOutput, InteractiveQAOutput, ProcessDocumentOutput, SmartSummarizationOutput } from '@/lib/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 type RiskScore = 'Low' | 'Medium' | 'High';
 
@@ -72,6 +76,18 @@ const renderWithMarkdown = (text: string) => {
 
 type AnalysisState = 'initial' | 'processing' | 'selecting_role' | 'analyzing' | 'complete';
 
+const supportedLanguages = [
+    { value: 'English', label: 'English' },
+    { value: 'Hindi', label: 'हिंदी (Hindi)' },
+    { value: 'Bengali', label: 'বাংলা (Bengali)' },
+    { value: 'Tamil', label: 'தமிழ் (Tamil)' },
+    { value: 'Telugu', label: 'తెలుగు (Telugu)' },
+    { value: 'Marathi', label: 'मराठी (Marathi)' },
+    { value: 'Gujarati', label: 'ગુજરાતી (Gujarati)' },
+    { value: 'Kannada', label: 'ಕನ್ನಡ (Kannada)' },
+    { value: 'Malayalam', label: 'മലയാളം (Malayalam)' },
+];
+
 export default function VakilSaab() {
   const [rawText, setRawText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -86,6 +102,7 @@ export default function VakilSaab() {
   const [parties, setParties] = useState<[string, string] | null>(null);
   const [analysisState, setAnalysisState] = useState<AnalysisState>('initial');
   const [isMounted, setIsMounted] = useState(false);
+  const [language, setLanguage] = useState('English');
 
   const [isLoading, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState('summary');
@@ -113,6 +130,7 @@ export default function VakilSaab() {
       } else {
         formData.append('text', rawText);
       }
+      formData.append('language', language);
 
       const result = await processDocumentAction(formData);
 
@@ -133,7 +151,7 @@ export default function VakilSaab() {
     setUserRole(role);
     setAnalysisState('analyzing');
     startTransition(async () => {
-        const result = await summarizeDocumentAction({documentText, userRole: role || undefined });
+        const result = await summarizeDocumentAction({documentText, userRole: role || undefined, language });
         if(result.success) {
             setSummary(result.data);
             setClauseExplanations({});
@@ -160,7 +178,7 @@ export default function VakilSaab() {
     if (!clause || clauseExplanations[clauseIndex] || !userRole) return;
 
     setExplainingClause(clauseIndex);
-    const result = await explainClauseAction({ clause, userRole });
+    const result = await explainClauseAction({ clause, userRole, language });
     if (result.success) {
       setClauseExplanations(prev => ({ ...prev, [clauseIndex]: result.data }));
     } else {
@@ -176,7 +194,7 @@ export default function VakilSaab() {
     setAskingQuestion(true);
     const questionToAsk = currentQuestion;
     setCurrentQuestion('');
-    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk, userRole: userRole || undefined });
+    const result = await askQuestionAction({ documentContent: documentText, question: questionToAsk, userRole: userRole || undefined, language });
     
     if (result.success) {
       setQaHistory(prev => [...prev, { question: questionToAsk, ...result.data }]);
@@ -231,10 +249,23 @@ export default function VakilSaab() {
                     Upload or Paste Document
                   </CardTitle>
                   <CardDescription>
-                    Upload a .pdf file, or paste the document text below to begin.
+                    Choose your language, then upload a .pdf file or paste the document text below to begin.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                      <Label htmlFor="language-select">Language</Label>
+                      <Select value={language} onValueChange={setLanguage} disabled={isProcessing}>
+                          <SelectTrigger id="language-select" className="w-full">
+                              <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              {supportedLanguages.map(lang => (
+                                  <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                              ))}
+                          </SelectContent>
+                      </Select>
+                  </div>
                   <div className="space-y-2">
                     <Input 
                       type="file" 

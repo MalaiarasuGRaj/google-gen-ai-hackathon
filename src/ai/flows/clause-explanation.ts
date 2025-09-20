@@ -15,6 +15,7 @@ import {z} from 'genkit';
 const ExplainClauseInputSchema = z.object({
   clause: z.string().describe('The legal clause to be explained.'),
   userRole: z.string().optional().describe('The user\'s role in the document (e.g., tenant, licensor).'),
+  language: z.string().optional().describe('The language for the output (e.g., "Hindi", "Tamil"). Defaults to English if not provided.'),
 });
 export type ExplainClauseInput = z.infer<typeof ExplainClauseInputSchema>;
 
@@ -36,6 +37,8 @@ const prompt = ai.definePrompt({
   input: {schema: ExplainClauseInputSchema},
   output: {schema: ExplainClauseOutputSchema},
   prompt: `You are a legal expert simplifying legal clauses for a layperson. The user's role in this document is: **{{#if userRole}}{{userRole}}{{else}}one of the parties{{/if}}**. All analysis should be from their perspective.
+
+  The user has requested the output in the following language: **{{#if language}}{{language}}{{else}}English{{/if}}**. All of your generated response must be in this language.
 
   For the following clause, provide:
   1. A simplified explanation of what this means *for the user*.
