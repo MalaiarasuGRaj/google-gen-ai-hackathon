@@ -44,41 +44,41 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20">
+        <section className="py-20 md:py-28">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold">Understand, Don't Just Sign</h3>
-              <p className="mt-2 text-muted-foreground">Everything you need for legal clarity.</p>
+            <div className="text-center mb-16">
+              <h3 className="text-3xl md:text-4xl font-bold">Understand, Don't Just Sign</h3>
+              <p className="mt-3 text-lg text-muted-foreground">Everything you need for legal clarity.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <Card className="text-center shadow-sm hover:shadow-md transition-shadow">
+              <Card className="text-center shadow-sm hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <Sparkles className="h-8 w-8 text-primary" />
                   </div>
-                  <CardTitle className="mt-4">AI-Powered Summaries</CardTitle>
+                  <CardTitle className="mt-4 text-xl">AI-Powered Summaries</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Get a concise, AI-generated overview of your document, highlighting key terms and obligations from your point of view.</p>
                 </CardContent>
               </Card>
-              <Card className="text-center shadow-sm hover:shadow-md transition-shadow">
+              <Card className="text-center shadow-sm hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <CheckCircle className="h-8 w-8 text-primary" />
                   </div>
-                  <CardTitle className="mt-4">Clause Explanations</CardTitle>
+                  <CardTitle className="mt-4 text-xl">Clause Explanations</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Dive into any clause for a simple explanation, risk assessment, and actionable negotiation suggestions.</p>
                 </CardContent>
               </Card>
-              <Card className="text-center shadow-sm hover:shadow-md transition-shadow">
+              <Card className="text-center shadow-sm hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
-                  <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
+                  <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit">
                     <MessageSquare className="h-8 w-8 text-primary" />
                   </div>
-                  <CardTitle className="mt-4">Interactive Q&A</CardTitle>
+                  <CardTitle className="mt-4 text-xl">Interactive Q&A</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">Ask questions about the document in plain language and get clear, context-aware answers instantly.</p>
@@ -89,39 +89,39 @@ export default function LandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20 bg-secondary/50">
+        <section className="py-20 md:py-28 bg-secondary/50">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <h3 className="text-3xl font-bold">Get Clarity in 3 Simple Steps</h3>
+                <div className="text-center mb-16">
+                    <h3 className="text-3xl md:text-4xl font-bold">Get Clarity in 3 Simple Steps</h3>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                     <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold shadow-lg">1</div>
-                        <h4 className="mt-6 text-xl font-semibold">Upload Document</h4>
-                        <p className="mt-2 text-muted-foreground">Securely upload or paste the text of your legal document.</p>
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-primary text-primary-foreground text-3xl font-bold shadow-lg">1</div>
+                        <h4 className="mt-6 text-2xl font-semibold">Upload Document</h4>
+                        <p className="mt-2 text-muted-foreground max-w-xs">Securely upload or paste the text of your legal document.</p>
                     </div>
                     <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold shadow-lg">2</div>
-                        <h4 className="mt-6 text-xl font-semibold">Select Your Role</h4>
-                        <p className="mt-2 text-muted-foreground">Choose your perspective (e.g., Tenant, Employee) for tailored analysis.</p>
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-primary text-primary-foreground text-3xl font-bold shadow-lg">2</div>
+                        <h4 className="mt-6 text-2xl font-semibold">Select Your Role</h4>
+                        <p className="mt-2 text-muted-foreground max-w-xs">Choose your perspective (e.g., Tenant, Employee) for tailored analysis.</p>
                     </div>
                     <div className="flex flex-col items-center">
-                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground text-2xl font-bold shadow-lg">3</div>
-                        <h4 className="mt-6 text-xl font-semibold">Receive Insights</h4>
-                        <p className="mt-2 text-muted-foreground">Get an instant breakdown, summaries, and answers.</p>
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-primary text-primary-foreground text-3xl font-bold shadow-lg">3</div>
+                        <h4 className="mt-6 text-2xl font-semibold">Receive Insights</h4>
+                        <p className="mt-2 text-muted-foreground max-w-xs">Get an instant breakdown, summaries, and answers.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         {/* Privacy Section */}
-        <section className="py-20">
+        <section className="py-20 md:py-28">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto text-center">
-                <div className="mx-auto bg-emerald-100 dark:bg-emerald-900/50 p-3 rounded-full w-fit">
-                    <Lock className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                <div className="mx-auto bg-emerald-100 dark:bg-emerald-900/50 p-4 rounded-full w-fit">
+                    <Lock className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
                 </div>
-              <h3 className="mt-6 text-3xl font-bold">Your Privacy is Our Priority</h3>
+              <h3 className="mt-6 text-3xl md:text-4xl font-bold">Your Privacy is Our Priority</h3>
               <p className="mt-4 text-lg text-muted-foreground">
                 We take your confidentiality seriously. Your documents are processed in-memory and are never stored on our servers. The analysis is performed securely, and your data is erased immediately after you close the session.
               </p>
